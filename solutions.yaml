@@ -1,0 +1,214 @@
+# Audio2txt v3.0 分析方案配置
+# 定義各種場景的智能摘要模板
+
+# 商業會議摘要
+business_meeting:
+  id: "business_meeting"
+  name: "商業會議摘要"
+  type: "summary"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.3
+    max_length: 1000
+  prompt_template: |
+    你是一位專業的會議記錄分析助手。請分析以下會議逐字稿，生成結構化的會議摘要報告。
+
+    會議逐字稿：
+    {transcript}
+
+    請嚴格按照以下格式輸出摘要：
+
+    ## 會議概況
+    - 會議主題：[從內容中識別主題]
+    - 主要討論議題：[列出 3-5 個主要議題]
+
+    ## 核心決策
+    [列出會議中的重要決策，每項一行]
+
+    ## 討論重點
+    [總結主要討論內容，5-8 個要點]
+
+    ## 行動項目
+    [列出需要執行的任務]
+
+    ## 風險與問題
+    [列出提到的風險或問題]
+
+    ## 後續追蹤
+    [下一步行動]
+
+    請務必用繁體中文回應，語氣專業簡潔。
+
+# 訪談/播客摘要
+interview_podcast:
+  id: "interview_podcast"
+  name: "訪談/播客摘要"
+  type: "summary"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.5
+    max_length: 800
+  prompt_template: |
+    請分析以下訪談或播客逐字稿，生成精彩摘要。
+
+    逐字稿：
+    {formatted_transcript}
+
+    請按照以下格式輸出：
+
+    ## 🎙️ 節目概況
+    - 節目主題：[總結主題]
+    - 嘉賓/受訪者：{speakers}
+
+    ## 💎 核心觀點
+    列出受訪者的主要觀點（5-10 條）
+
+    ## ✨ 金句摘錄
+    摘錄節目中的精彩語句（3-5 句）
+
+    ## 🔑 關鍵重點
+    總結對聽眾最有價值的內容
+
+    ## 🔗 提及資源
+    節目中提到的書籍、工具、網站等資源
+
+    請用繁體中文回應，保持口語化和吸引力。
+
+# 演講/課程摘要
+lecture_course:
+  id: "lecture_course"
+  name: "演講/課程摘要"
+  type: "summary"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.4
+    max_length: 900
+  prompt_template: |
+    請分析以下演講或課程逐字稿，生成學習筆記。
+
+    逐字稿：
+    {formatted_transcript}
+
+    請按照以下格式輸出：
+
+    ## 📖 課程概況
+    - 課程主題：[總結主題]
+    - 講師：{speakers}
+
+    ## 🎯 學習目標
+    本次課程的主要學習目標
+
+    ## 📝 課程大綱
+    按時間順序列出主要章節/段落
+
+    ## 🔑 核心概念
+    列出重要的概念、理論或方法（5-8 個）
+
+    ## 💡 重點筆記
+    詳細記錄關鍵知識點
+
+    ## 📚 延伸學習
+    講師提到的參考資料或延伸主題
+
+    ## ❓ Q&A 摘要
+    如有問答環節，總結問題和回答
+
+    請用繁體中文回應，適合複習和學習使用。
+
+# 通用型摘要（預設）
+universal_summary:
+  id: "universal_summary"
+  name: "通用型智能摘要"
+  type: "summary"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.4
+    max_length: 1000
+  prompt_template: |
+    你是一位專業的內容摘要專家。請分析以下內容並生成結構化摘要。
+
+    內容：
+    {transcript}
+
+    請按照以下格式輸出摘要：
+
+    ## 內容概述
+    [用 2-3 句話總結整體內容主題]
+
+    ## 核心重點
+    [列出 5-8 個主要重點，每項一行]
+
+    ## 關鍵訊息
+    [提取重要的資訊、數據、結論或建議]
+
+    ## 重要細節
+    [記錄值得注意的細節或補充說明]
+
+    請用繁體中文回應，語氣客觀專業。
+
+# 快速摘要
+quick_summary:
+  id: "quick_summary"
+  name: "快速摘要"
+  type: "summary"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.5
+    max_length: 300
+  prompt_template: |
+    請用 3-5 個要點總結以下內容：
+
+    {transcript}
+
+    用繁體中文條列式呈現。
+
+# 待辦事項提取
+action_items:
+  id: "action_items"
+  name: "待辦事項提取"
+  type: "action_items"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.2
+    max_length: 500
+  prompt_template: |
+    請從以下會議逐字稿中提取所有待辦事項和任務。
+
+    逐字稿：
+    {formatted_transcript}
+
+    請按照以下格式輸出每個任務：
+
+    ## ✅ 待辦事項清單
+
+    ### 任務 1
+    - 📋 任務：[任務描述]
+    - 👤 負責人：[如有提及]
+    - 📅 截止日期：[如有提及]
+    - ⚡ 優先級：[高/中/低]
+
+    只輸出明確提到的任務，不要臆測。用繁體中文回應。
+
+# 關鍵詞提取
+keywords:
+  id: "keywords"
+  name: "關鍵詞提取"
+  type: "keywords"
+  enabled: true
+  model: "gpt-oss:20b"
+  parameters:
+    temperature: 0.3
+    max_length: 200
+  prompt_template: |
+    請從以下內容中提取 10-15 個最重要的關鍵詞或短語。
+
+    內容：
+    {transcript}
+
+    請以條列式輸出，每個關鍵詞一行。用繁體中文回應。

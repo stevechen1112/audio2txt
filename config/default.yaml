@@ -1,0 +1,29 @@
+# Audio2txt v3.0 Default Configuration
+
+app:
+  name: "audio2txt"
+  version: "3.0.0"
+  debug: true
+
+models:
+  transcription:
+    engine: "faster-whisper"
+    model_size: "large-v3"
+    device: "cuda"
+    
+  diarization:
+    engine: "pyannote"
+    model: "pyannote/speaker-diarization-3.1"
+    
+  llm:
+    provider: "ollama"
+    base_url: "http://localhost:11434"
+    model: "gemma2:27b"
+
+pipeline:
+  parallel: true
+  checkpoint_enabled: true
+  cache_enabled: true
+
+export:
+  formats: ["txt", "pdf", "json"]
