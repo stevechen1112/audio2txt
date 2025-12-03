@@ -2,6 +2,13 @@
 .env.example
 dataset_samples/
 
+# Project specific
+*.db
+*.sqlite
+*.sqlite3
+output/
+uploads/
+
 # Python
 __pycache__/
 *.py[cod]

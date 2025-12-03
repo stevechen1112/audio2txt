@@ -1,169 +1,196 @@
-# 🎙️ Audio2txt v3.0 - Next Generation AI Audio Analysis Platform
+# 🎙️ Audio2txt v4.0 Enterprise
 
-> 🚀 從 v2.x 進化而來，性能提升 10 倍的現代化 AI 語音轉錄與智能分析平台
+> 企業級雲端 AI 音訊轉文字與智能摘要平台
 
-## ✨ v3.0 核心特性
-
-- ⚡ **10x 性能提升**：並行處理架構（轉錄 + 說話人分離同時執行）
-- 🤖 **智能摘要系統**：本地 LLM 生成結構化報告（gpt-oss:20b）
-- 🎯 **通用型分析**：適用於會議、訪談、課程、播客等任何場景
-- 🏗️ **現代架構**：完全異步 + 插件式引擎設計
-- 🔓 **完全開源免費**：MIT License + 本地處理，無 API 費用
-- 📱 **未來擴展**：支援 Web API 與手機 APP 開發
-
-## 🚀 快速開始
-
-### 1. 基礎轉錄與說話人分離
-```bash
-python test_wav.py
-```
-- 輸入：音訊檔案（WAV 格式）
-- 輸出：帶時間戳與說話人標記的轉錄文本
-- 處理速度：RTF 0.08x（47 分鐘音訊 → 3 分 50 秒）
-
-### 2. 智能摘要生成
-```bash
-python test_summary.py
-```
-- 自動生成結構化摘要報告
-- 使用本地 gpt-oss:20b 模型（完全免費）
-- 輸出：Markdown 格式報告
-
-### 3. 配置 Ollama（智能摘要需求）
-```bash
-# 安裝 Ollama
-# Windows/Mac: 從 https://ollama.com 下載安裝
-
-# 下載 gpt-oss:20b 模型
-ollama pull gpt-oss:20b
-
-# 啟動 Ollama 服務（自動後台運行）
-```
-
-## 📁 專案結構
-
-```
-audio2txt/
-├── packages/core/audio2txt/   # 核心引擎
-│   ├── models/                # 資料模型（Transcript, Speaker, Analysis）
-│   ├── engines/               # AI 引擎
-│   │   ├── transcription/     # Faster-Whisper large-v3
-│   │   ├── diarization/       # Pyannote 3.1
-│   │   └── analysis/          # Ollama LLM
-│   ├── pipeline/              # 並行處理管線
-│   └── utils/                 # 工具（Logger, Config）
-├── audio2txt-legacy/          # v2.x 完整備份
-├── solutions.yaml             # 智能摘要模板配置
-├── test_wav.py               # 轉錄測試腳本
-└── test_summary.py           # 摘要測試腳本
-```
-
-## 🎯 核心功能展示
-
-### 轉錄 + 說話人分離
-```python
-from audio2txt.engines.transcription import FasterWhisperEngine
-from audio2txt.engines.diarization import PyannoteDiarizationEngine
-from audio2txt.pipeline import TranscriptionPipeline
-
-# 初始化引擎
-transcription_engine = FasterWhisperEngine(
-    model_name="large-v3",
-    device="cuda",
-    language="zh",
-)
-
-diarization_engine = PyannoteDiarizationEngine(
-    model_name="pyannote/speaker-diarization-3.1",
-    device="cuda",
-)
-
-# 創建管線並處理（並行模式）
-pipeline = TranscriptionPipeline(
-    transcription_engine=transcription_engine,
-    diarization_engine=diarization_engine,
-)
-
-async with pipeline:
-    transcript = await pipeline.process(
-        audio_path="audio.wav",
-        enable_diarization=True,
-        parallel=True,  # 10x 性能提升
-    )
-
-# 輸出格式化文本
-print(transcript.formatted_text)
-# [00:00 -> 00:04][SPEAKER_03]: 各位好,我貴姓陳
-```
-
-### 智能摘要生成
-```python
-from audio2txt.engines.analysis import OllamaAnalysisEngine
-from audio2txt.models.analysis import Solution, AnalysisType
-
-# 初始化分析引擎
-engine = OllamaAnalysisEngine(
-    model_name="gpt-oss:20b",
-    base_url="http://localhost:11434",
-)
-
-# 定義分析方案（通用型）
-solution = Solution(
-    id="universal_summary",
-    name="通用型智能摘要",
-    type=AnalysisType.SUMMARY,
-    model="gpt-oss:20b",
-    prompt_template="...",  # 見 solutions.yaml
-)
-
-# 執行分析
-async with engine:
-    result = await engine.analyze(transcript, solution)
-
-print(result.content)
-# ## 內容概述
-# ## 核心重點
-# ## 關鍵訊息
-# ## 重要細節
-```
-
-## 📱 手機 APP 開發規劃
-
-Audio2txt v3.0 核心引擎可擴展為手機 APP！查看 [APP 開發指南](docs/APP_DEVELOPMENT.md) 了解詳情。
-
-**推薦架構**：雲端處理模式
-- 手機 APP（React Native / Flutter）→ 雲端 API（FastAPI + v3.0 核心）
-- 優點：快速、高品質、跨平台
-- 成本：$50-200/月（AWS/GCP GPU 實例）
-
-**功能對比**：
-
-| 功能 | 本地版 v3.0 | 手機 APP（雲端） |
-|------|-------------|------------------|
-| 轉錄品質 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| 說話人分離 | ✅ | ✅ |
-| 智能摘要 | ✅ | ✅ |
-| 處理速度 | 快（本地 GPU） | 快（雲端 GPU） |
-| 隨時隨地使用 | ❌ | ✅ |
-| 離線功能 | ✅ | ❌ |
-| 月費 | $0 | $50-200 |
-
-## 🔄 從 v2.x 遷移
-
-v2.x 系統已完整備份至 `audio2txt-legacy/`，繼續可用：
-
-```bash
-cd audio2txt-legacy
-python enhanced_ultimate_processor.py audio.wav
-```
-
-## 📖 文檔
-
-- [開發狀態](DEVELOPMENT_STATUS.md) - 最新開發進度
-- [開發計畫](PROJECT_SETUP_PLAN.md) - 架構設計
-- [遷移報告](MIGRATION_COMPLETE.md) - v2.x → v3.0 遷移記錄
-- [APP 開發指南](docs/APP_DEVELOPMENT.md) - 手機 APP 開發規劃
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/stevechen1112/audio2txt)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![AI](https://img.shields.io/badge/AI-AssemblyAI%20%2B%20GPT--5%20nano-orange.svg)](GPT5_NANO_INTEGRATION.md)
 
 ---
 
-**⭐ 如果有幫助，請給我們一個星星！**
+## ✨ 核心特色
+
+- 🎯 **極致準確**：AssemblyAI 業界領先的中文語音辨識
+- 👥 **智能分離**：自動識別並標記多位說話者
+- 🤖 **GPT-5 nano**：高品質繁體中文摘要，超低成本
+- ⚖️ **專業模板**：法律諮詢、客戶訪談、決策會議等多種場景
+- 🌐 **Web 介面**：零技術門檻，開箱即用
+- 📊 **完整記錄**：自動儲存歷史，隨時查詢
+
+---
+
+## 🚀 快速開始
+
+### 1. 啟動後端（運算中心）
+
+```powershell
+python run_server.py
+```
+
+### 2. 啟動前端（會議室端）
+
+```powershell
+python -m streamlit run apps/web/app.py
+```
+
+### 3. 開始使用
+
+1. 瀏覽器訪問 `http://localhost:8501`
+2. 選擇場景模板（法律諮詢/客戶訪談/決策會議）
+3. 錄音或上傳音訊檔
+4. 點擊「🚀 開始處理」
+5. 等待 5-10 分鐘，獲得專業報告
+
+**預設帳號：** `admin` / `password123`
+
+---
+
+## 📖 完整文檔
+
+- [📋 開發計畫](PLAN_v4_ENTERPRISE.md) - 系統架構與功能規劃
+- [🤖 GPT-5 nano 整合](GPT5_NANO_INTEGRATION.md) - 中文摘要引擎詳細說明
+
+---
+
+## 🏗️ 系統架構
+
+```
+客戶端 (Web 瀏覽器)
+    │
+    │ HTTP/HTTPS
+    ▼
+FastAPI 後端服務
+    │
+    ├─► AssemblyAI API (雲端)
+    │   ├── 語音轉文字 (中文優化)
+    │   └── 說話者分離 (Diarization)
+    │
+    ├─► OpenAI GPT-5 nano (雲端)
+    │   └── 繁體中文摘要生成
+    │
+    └─► SQLite (本地資料庫)
+        └── 任務記錄與詞彙管理
+```
+
+**優勢：**
+- ✅ 無需 GPU 硬體投資
+- ✅ 即開即用，部署簡單
+- ✅ 彈性擴展，按量付費
+- ✅ API 自動更新，享受最新技術
+
+---
+
+## 🎯 適用場景
+
+| 場景 | 模板 | 輸出重點 |
+|------|------|----------|
+| 法律諮詢 | `legal_consultation` | 案件背景、爭議點、法律建議 |
+| 客戶訪談 | `client_interview` | 痛點、需求清單、預算限制 |
+| 決策會議 | `executive_meeting` | 決議事項、待辦事項、負責人 |
+| 一般會議 | `meeting_minutes` | 討論摘要、結論、下次會議 |
+
+---
+
+## 📊 效能與成本
+
+### 效能指標
+- **處理速度**：約 5-8 分鐘/小時音訊
+- **實測案例**：48.7 分鐘音訊 → 6 分鐘處理
+- **說話人識別**：自動區分 10+ 位發言者
+- **支援格式**：WAV, M4A, MP3, MP4, AAC, FLAC, OGG
+- **中文準確率**：95%+ (AssemblyAI 中文優化)
+
+### 成本分析 (每小時音訊)
+| 服務 | 用途 | 成本 |
+|------|------|------|
+| AssemblyAI | 轉錄 + 說話者分離 | ~$1.20 |
+| GPT-5 nano | 中文摘要生成 | ~$0.03 |
+| **總計** | | **~$1.23** |
+
+**對比：**
+- PLAUD NOTE: $9.9/月 (僅 300 分鐘，超過另計)
+- Audio2txt: 按實際使用量付費，無月費
+
+---
+
+## 🆚 競品對比
+
+| 特性 | Audio2txt v4.0 | PLAUD NOTE | Rev.ai | Otter.ai |
+|------|----------------|------------|--------|----------|
+| 中文支援 | ✅ 優秀 | ✅ 良好 | ⚠️ 一般 | ⚠️ 一般 |
+| 說話者分離 | ✅ 自動 | ✅ 自動 | ✅ 自動 | ✅ 自動 |
+| 中文摘要 | ✅ GPT-5 nano | ⚠️ 英文為主 | ❌ 無 | ⚠️ 英文為主 |
+| 專業模板 | ✅ 5+ 種 | ⚠️ 固定 | ❌ 無 | ⚠️ 固定 |
+| 成本模式 | 💰 按用量 | 💰 月費 $9.9 | 💰 按分鐘 | 💰 月費 $16.99 |
+| 私有部署 | ✅ 支援 | ❌ SaaS only | ❌ SaaS only | ❌ SaaS only |
+| API 整合 | ✅ 完整 API | ⚠️ 有限 | ✅ 完整 API | ✅ 完整 API |
+
+**Audio2txt 優勢：**
+- ✅ 專為繁體中文優化
+- ✅ 靈活的專業模板系統
+- ✅ 可私有部署，數據可控
+- ✅ 按實際用量付費，無月費綁定
+
+---
+
+## 🛠️ 技術堆疊
+
+### 後端框架
+- **FastAPI**: 高效能 API 服務
+- **SQLite**: 輕量級資料庫
+- **Celery** (可選): 非同步任務處理
+
+### 前端界面
+- **Streamlit**: 快速 Web UI 開發
+- **JavaScript**: 互動功能增強
+
+### AI 服務
+- **AssemblyAI**: 
+  - Universal-1 模型 (中文優化)
+  - Speaker Diarization (說話者分離)
+  - Vocabulary Boost (詞彙增強)
+  
+- **OpenAI GPT-5 nano**:
+  - 繁體中文摘要生成
+  - 多種專業模板
+  - 超低成本 ($0.05/1M input tokens)
+
+### 安全認證
+- HTTP Basic Auth
+- JWT Token
+- API Key 管理
+
+---
+
+## 📝 授權
+
+MIT License - 完全開源免費
+
+---
+
+## 💡 配置需求
+
+### 最低需求
+- Python 3.10+
+- 512MB RAM (API 模式)
+- 網路連線 (存取雲端 API)
+
+### API Keys
+1. **AssemblyAI API Key**: [免費註冊](https://www.assemblyai.com/)
+   - 每月免費額度: 3 小時轉錄
+   
+2. **OpenAI API Key**: [申請連結](https://platform.openai.com/)
+   - 新用戶贈送: $5 免費額度 (約 5000 分鐘摘要)
+
+---
+
+## 🙏 致謝
+
+- [AssemblyAI](https://www.assemblyai.com/) - 領先的語音辨識 API
+- [OpenAI](https://openai.com/) - GPT-5 nano 語言模型
+- [FastAPI](https://fastapi.tiangolo.com/) - 現代化 Web 框架
+- [Streamlit](https://streamlit.io/) - 快速 UI 開發工具
+
+---
+
+**⭐ 如果這個專案對您有幫助，請給我們一個星星！**

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "audio2txt"
-version = "3.0.0-alpha.1"
-description = "Next Generation AI Audio Transcription Platform"
+version = "4.0.0"
+description = "Audio2txt Enterprise - Cloud-based AI Audio Analysis Platform"
 authors = ["Audio2txt Team"]
 license = "MIT"
 readme = "README.md"
@@ -11,12 +11,8 @@ python = "^3.10"
 fastapi = "^0.109.0"
 uvicorn = {extras = ["standard"], version = "^0.27.0"}
 pydantic = "^2.5.0"
-faster-whisper = "^1.0.0"
-pyannote-audio = "^3.1.0"
-librosa = "^0.10.0"
-torch = "^2.1.0"
-transformers = "^4.36.0"
-opencc-python-reimplemented = "^0.1.7"
+assemblyai = "^0.20.0"
+openai = "^1.54.0"
 redis = "^5.0.0"
 celery = {extras = ["redis"], version = "^5.3.0"}
 reportlab = "^4.0.0"
@@ -25,6 +21,9 @@ python-dotenv = "^1.0.0"
 pyyaml = "^6.0"
 click = "^8.1.0"
 rich = "^13.7.0"
+streamlit = "^1.30.0"
+requests = "^2.31.0"
+python-multipart = "^0.0.6"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

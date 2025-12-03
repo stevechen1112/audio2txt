@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio2txt Enterprise 前端</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Audio2txt Enterprise</h1>
+      <p class="subtitle">輕量版前端 · 直接呼叫 FastAPI</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. 連線 / 登入</h2>
+        <form id="loginForm">
+          <label>
+            API 位址
+            <input type="url" id="apiBase" value="http://localhost:8000" required />
+          </label>
+          <div class="grid-2">
+            <label>
+              使用者
+              <input type="text" id="username" value="admin" required />
+            </label>
+            <label>
+              密碼
+              <input type="password" id="password" value="password123" required />
+            </label>
+          </div>
+          <button type="submit">登入並取得 Token</button>
+          <p id="loginStatus" class="status"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>2. 上傳 / 建立任務</h2>
+        <form id="processForm">
+          <label>
+            選擇音訊
+            <input type="file" id="audioFile" accept=".wav,.mp3,.m4a,.aac,.mp4" required />
+          </label>
+          <label>
+            模板
+            <select id="templateSelect">
+              <option value="universal_summary">通用摘要</option>
+              <option value="legal_consultation">法律諮詢</option>
+              <option value="client_interview">客戶訪談</option>
+              <option value="executive_meeting">高層決策</option>
+              <option value="concise_minutes">精簡逐字稿</option>
+            </select>
+          </label>
+          <button type="submit">開始處理</button>
+        </form>
+        <div id="progressPanel" class="panel hidden">
+          <div class="panel-row">
+            <span>任務 ID</span>
+            <code id="taskIdLabel"></code>
+          </div>
+          <div class="progress">
+            <div id="progressBar"></div>
+          </div>
+          <p id="progressText">等待中...</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3. 結果</h2>
+        <div id="resultArea" class="panel">
+          <p class="placeholder">尚無資料，請建立任務。</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. 歷史記錄</h2>
+        <button id="refreshHistory">重新整理</button>
+        <div id="historyList" class="history"></div>
+      </section>
+
+      <section class="card">
+        <h2>5. 專有名詞</h2>
+        <form id="vocabForm" class="inline-form">
+          <input type="text" id="vocabInput" placeholder="輸入新詞，例如：台積電" />
+          <button type="submit">新增</button>
+        </form>
+        <div id="vocabList" class="tags"></div>
+      </section>
+    </main>
+
+    <footer>
+      <small>© 2025 Audio2txt Enterprise · 簡約前端</small>
+    </footer>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
