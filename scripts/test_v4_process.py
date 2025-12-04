@@ -6,10 +6,11 @@ import uuid
 # Add project root to path
 sys.path.insert(0, str(Path.cwd()))
 
-from apps.api.services import service
+from apps.api.services import get_service
 from apps.api.database import db
 
 async def main():
+    service = get_service()
     audio_path = Path(r"C:\Users\User\Desktop\audio2txt\dataset_samples\1015小組顧問.m4a")
     if not audio_path.exists():
         print(f"File not found: {audio_path}")

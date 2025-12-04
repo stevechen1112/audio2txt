@@ -31,7 +31,7 @@ class OpenAISummaryEngine:
         self,
         transcript_text: str,
         template_id: str = "universal_summary",
-        max_tokens: int = 1000
+        max_tokens: int = 5000
     ) -> str:
         """
         Generate Chinese summary using GPT-5 nano
@@ -175,9 +175,9 @@ class OpenAISummaryEngine:
                         "content": prompt
                     }
                 ],
-                max_tokens=max_tokens,
-                temperature=0.3,  # Lower temperature for more consistent summaries
-                top_p=0.9
+                max_completion_tokens=max_tokens,  # GPT-5 uses max_completion_tokens instead of max_tokens
+                temperature=1,  # Model requires temperature=1
+                top_p=1
             )
             
             summary = response.choices[0].message.content.strip()
@@ -227,8 +227,8 @@ class OpenAISummaryEngine:
 請列出行動項目:"""
                     }
                 ],
-                max_tokens=500,
-                temperature=0.2
+                max_completion_tokens=2000,  # GPT-5 uses max_completion_tokens
+                temperature=1
             )
             
             content = response.choices[0].message.content.strip()

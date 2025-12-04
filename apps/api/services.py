@@ -6,14 +6,19 @@ import uuid
 from pathlib import Path
 from typing import Dict, Any, List
 import textwrap
+import os
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from fastapi import UploadFile
 
 from .database import db
 from .engines.assemblyai_engine import AssemblyAIEngine
+from .engines.deepgram_engine import DeepgramEngine
 from .engines.openai_engine import OpenAISummaryEngine
+from .engines.chinese_processor import ChineseTextProcessor
 from .notifications import notification_manager
 from packages.core.audio2txt.utils.config import Config
 
@@ -29,11 +34,24 @@ class ProcessingService:
         
         # Load config for templates and API keys
         self.config = Config()
-        # Initialize AssemblyAI engine
-        api_key = self.config.assemblyai_api_key
-        if not api_key:
-            raise RuntimeError("ASSEMBLYAI_API_KEY is not configured in environment variables or .env file.")
-        self.assemblyai_engine = AssemblyAIEngine(api_key=api_key)
+        
+        # Initialize STT engine based on configuration
+        stt_engine = self.config.stt_engine.lower()
+        
+        if stt_engine == "deepgram":
+            # Use Deepgram (recommended for Chinese)
+            api_key = self.config.deepgram_api_key
+            if not api_key:
+                raise RuntimeError("DEEPGRAM_API_KEY is not configured. Please add it to .env file.")
+            self.stt_engine = DeepgramEngine(api_key=api_key)
+            print("✅ Using Deepgram STT Engine (optimized for Chinese)")
+        else:
+            # Fallback to AssemblyAI
+            api_key = self.config.assemblyai_api_key
+            if not api_key:
+                raise RuntimeError("ASSEMBLYAI_API_KEY is not configured in environment variables or .env file.")
+            self.stt_engine = AssemblyAIEngine(api_key=api_key)
+            print("⚠️  Using AssemblyAI STT Engine (consider switching to Deepgram for better Chinese support)")
         
         # Initialize OpenAI engine for Chinese summarization
         openai_key = self.config.openai_api_key
@@ -42,6 +60,9 @@ class ProcessingService:
         else:
             self.openai_engine = None
             print("Warning: OPENAI_API_KEY not configured. Summary generation will use AssemblyAI's English summary.")
+        
+        # Initialize Chinese text processor
+        self.chinese_processor = ChineseTextProcessor()
         
     @classmethod
     def get_instance(cls):
@@ -86,14 +107,19 @@ class ProcessingService:
             # Fetch vocabulary for better accuracy
             vocab_list = db.get_vocabulary()
             
-            # 1. Transcription & Diarization using AssemblyAI
+            # 1. Transcription & Diarization using configured STT engine
             db.update_task(task_id, "transcribing", 20)
             
-            result = await self.assemblyai_engine.transcribe_with_diarization(
+            result = await self.stt_engine.transcribe_with_diarization(
                 audio_path=file_path,
                 language="zh",  # Chinese
                 vocabulary=vocab_list or None,
             )
+            
+            # 1.5. Post-process Chinese text to improve quality
+            db.update_task(task_id, "post-processing", 50)
+            result["segments"] = self.chinese_processor.process_segments(result["segments"])
+            result["formatted_text"] = self.chinese_processor.format_transcript(result["segments"])
             
             db.update_task(task_id, "analyzing", 60)
             
@@ -289,19 +315,38 @@ class ProcessingService:
         return highlights
     
     def _export_report_pdf(self, report_content: str, pdf_path: Path) -> None:
-        """Export markdown text into a very simple PDF document"""
+        """Export markdown text into a PDF document with Chinese support"""
         pdf_path.parent.mkdir(parents=True, exist_ok=True)
         c = canvas.Canvas(str(pdf_path), pagesize=letter)
+        
+        # Register Chinese font
+        font_name = "Helvetica"  # Default fallback
+        try:
+            # Try Windows font (Microsoft JhengHei)
+            font_path = r"C:\Windows\Fonts\msjh.ttc"
+            if os.path.exists(font_path):
+                pdfmetrics.registerFont(TTFont('MicrosoftJhengHei', font_path))
+                font_name = "MicrosoftJhengHei"
+            else:
+                print(f"Warning: Chinese font not found at {font_path}")
+        except Exception as e:
+            print(f"Warning: Could not load Chinese font: {e}")
+            
+        c.setFont(font_name, 10)
+        
         width, height = letter
         x_margin = 40
         y = height - 50
         line_height = 14
         
         for line in report_content.splitlines():
-            chunks = textwrap.wrap(line, 90) or [""]
+            # Simple wrapping (Note: textwrap counts chars, not visual width)
+            # Reducing width to 50 chars to account for wider Chinese characters
+            chunks = textwrap.wrap(line, 50) or [""]
             for chunk in chunks:
                 if y <= 50:
                     c.showPage()
+                    c.setFont(font_name, 10)  # Reset font on new page
                     y = height - 50
                 c.drawString(x_margin, y, chunk)
                 y -= line_height
@@ -324,4 +369,14 @@ class ProcessingService:
         from datetime import datetime
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-service = ProcessingService.get_instance()
+
+# Lazy initialization - don't create instance at module import
+service = None
+
+
+def get_service():
+    """Get or create service instance (lazy initialization)"""
+    global service
+    if service is None:
+        service = ProcessingService.get_instance()
+    return service

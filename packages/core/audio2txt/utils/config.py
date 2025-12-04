@@ -45,7 +45,11 @@ class Config(BaseSettings):
     
     # Cloud API Keys
     assemblyai_api_key: Optional[str] = Field(None, alias="ASSEMBLYAI_API_KEY")
+    deepgram_api_key: Optional[str] = Field(None, alias="DEEPGRAM_API_KEY")
     openai_api_key: Optional[str] = Field(None, alias="OPENAI_API_KEY")
+    
+    # STT Engine Selection (assemblyai or deepgram)
+    stt_engine: str = Field("assemblyai", alias="STT_ENGINE")
     
     # Celery / Async Task Config
     use_celery: bool = Field(False, alias="USE_CELERY")

@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/stevechen1112/audio2txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![AI](https://img.shields.io/badge/AI-AssemblyAI%20%2B%20GPT--5%20nano-orange.svg)](GPT5_NANO_INTEGRATION.md)
+[![AI](https://img.shields.io/badge/AI-AssemblyAI%20%2B%20GPT--5%20nano-orange.svg)](docs/GPT5_NANO_INTEGRATION.md)
 
 ---
 
@@ -47,8 +47,23 @@ python -m streamlit run apps/web/app.py
 
 ## 📖 完整文檔
 
-- [📋 開發計畫](PLAN_v4_ENTERPRISE.md) - 系統架構與功能規劃
-- [🤖 GPT-5 nano 整合](GPT5_NANO_INTEGRATION.md) - 中文摘要引擎詳細說明
+- [📋 開發計畫](docs/PLAN_v4_ENTERPRISE.md) - 系統架構與功能規劃
+- [🤖 GPT-5 nano 整合](docs/GPT5_NANO_INTEGRATION.md) - 中文摘要引擎詳細說明
+
+---
+
+## 🧪 測試與驗證
+
+系統包含完整的測試腳本，位於 `scripts/` 目錄：
+
+- `scripts/test_v4_process.py`: 完整流程測試（轉錄 + 摘要 + 報告）
+- `scripts/test_summary_only.py`: 僅測試摘要生成
+- `scripts/test_pdf_gen.py`: 僅測試 PDF 報告生成
+
+執行方式：
+```powershell
+python scripts/test_v4_process.py
+```
 
 ---
 

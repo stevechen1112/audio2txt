@@ -6,7 +6,7 @@ from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from ..services import service
+from ..services import get_service
 from ..database import db
 from ..tasks import process_audio_task
 
@@ -24,6 +24,7 @@ class TaskResponse(BaseModel):
 async def upload_audio(file: UploadFile = File(...)):
     """Upload an audio file for processing"""
     try:
+        service = get_service()
         file_path = await service.save_upload(file)
         return {"file_path": file_path, "filename": file.filename}
     except Exception as e:
@@ -41,6 +42,7 @@ async def process_audio(request: ProcessRequest, background_tasks: BackgroundTas
     # Create task in database
     db.create_task(task_id, request.file_path, request.template_id)
     
+    service = get_service()
     if service.config.use_celery:
         process_audio_task.delay(task_id, request.file_path, request.template_id)
     else:
